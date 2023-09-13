@@ -1,13 +1,11 @@
 import {useState} from "react";
-// import {
-//   Link,
-// } from 'react-router-dom'
+import { Table } from 'react-bootstrap'
 
 const mongoRequestsData = [
   {
     id: 1,
     requestHeaders: {
-      'host': 'requestbinder.com',
+      'host': 'requestbinder.com/1111',
       'content-length': '97',
       'accept': 'applic... */*',
       'sec-fetch-site': 'same-origin',
@@ -24,7 +22,7 @@ const mongoRequestsData = [
   {
     id: 2,
     requestHeaders: {
-      'host': 'requestbinder.com',
+      'host': 'requestbinder.com/2222',
       'content-length': '97',
       'accept': 'applic... */*',
       'sec-fetch-site': 'same-origin',
@@ -41,7 +39,7 @@ const mongoRequestsData = [
   {
     id: 3,
     requestHeaders: {
-      'host': 'requestbinder.com',
+      'host': 'requestbinder.com/3333',
       'content-length': '97',
       'accept': 'applic... */*',
       'sec-fetch-site': 'same-origin',
@@ -58,7 +56,7 @@ const mongoRequestsData = [
   {
     id: 4,
     requestHeaders: {
-      'host': 'requestbinder.com',
+      'host': 'requestbinder.com/4444',
       'content-length': '97',
       'accept': 'applic... */*',
       'sec-fetch-site': 'same-origin',
@@ -117,12 +115,12 @@ const Header = ({ bin }) => {
   )
 }
 
-const SideBar = ({ requests, handleRequestClick }) => {
+const SideBar = ({ pRequests, handleRequestClick }) => {
   return (
     <>
-      <table>
+      <Table striped>
         <tbody>
-          {requests.map(request =>
+          {pRequests.map(request =>
             <tr key={request.id}>
               <td>
                 <p onClick={() => handleRequestClick(request.mongo_id)} key={request.id}>{request.http_method}{request.http_path}</p>
@@ -130,7 +128,7 @@ const SideBar = ({ requests, handleRequestClick }) => {
             </tr>
           )}
         </tbody>
-      </table>
+      </Table>
     </>
   )
 }
@@ -142,13 +140,20 @@ const Main = ({ homePage }) => {
         <p>Main</p>
       </div>
     )
-  } else {
-    return (
-      <div>
-        <p>Request being displayed</p>
-      </div>
-    )
   }
+  return (
+    <>
+      <table>
+        <tbody>
+          {Object.keys(homePage).map((header, idx) =>
+            <tr key={idx}>
+              <td>"{header}": "{homePage[header]}"</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </>
+  )
 }
 
 const App = () => {
@@ -158,38 +163,26 @@ const App = () => {
   
   const handleRequestClick = (mongoID) => {
     console.log(mongoID)
-    setHomePage(mongoID)
+    let requestData = searchMongo(mongoID, mongoRequests)
+    setHomePage(requestData)
+  }
+
+  const searchMongo = (mongoID, mongoRequests) => {
+    console.log(mongoRequests);
+    let singleRequest = mongoRequests.find(request => {
+      return request.id === mongoID
+    });
+    console.log(singleRequest.requestHeaders);
+    return singleRequest.requestHeaders;
   }
 
   return (
     <div>
       <Header bin={bin} />
-      <SideBar requests={pgRequests} handleRequestClick={handleRequestClick} />
+      <SideBar pRequests={pgRequests} handleRequestClick={handleRequestClick} />
       <Main homePage={homePage}/>
     </div>
   )
 }
 
 export default App;
-
-// import { Table } from 'react-bootstrap'
-
-// return (
-//   <>
-//     <tbody>
-//       {requests.map(request =>
-//         <>
-//           <tr key={request.id}>
-//             <td>
-//               // { <Link to={`/contacts/${contact.id}`}>
-//               //  {contact.name} {' '} {contact.number} {' '}
-//               </Link> }*/
-//             </td>
-//           </tr>
-//         </>
-//       )}
-//     </tbody>
-//   </>
-// )
-
-
