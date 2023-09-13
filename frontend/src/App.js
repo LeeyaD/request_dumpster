@@ -1,6 +1,9 @@
-// import {useState} from "react";
+import {useState} from "react";
+// import {
+//   Link,
+// } from 'react-router-dom'
 
-const requests = [
+const mongoRequestsData = [
   {
     id: 1,
     requestHeaders: {
@@ -82,21 +85,21 @@ const pgRequestsData = [
   {
     id: 2,
     bin_id: 2,
-    mongo_id: 1,
+    mongo_id: 2,
     http_method: 'GET',
     http_path: '/webhook/bin_number/request_number'
   },
   {
     id: 3,
     bin_id: 3,
-    mongo_id: 1,
+    mongo_id: 3,
     http_method: 'GET',
     http_path: '/webhook/bin_number/request_number'
   },
   {
     id: 4,
     bin_id: 4,
-    mongo_id: 1,
+    mongo_id: 4,
     http_method: 'GET',
     http_path: '/webhook/bin_number/request_number'
   },
@@ -114,38 +117,55 @@ const Header = ({ bin }) => {
   )
 }
 
-const SideBar = ({ requests }) => {
+const SideBar = ({ requests, handleRequestClick }) => {
   return (
     <>
-      <tbody>
-        {requests.map(request =>
-          <>
+      <table>
+        <tbody>
+          {requests.map(request =>
             <tr key={request.id}>
               <td>
-                {request.http_method}{request.http_path}
+                <p onClick={() => handleRequestClick(request.mongo_id)} key={request.id}>{request.http_method}{request.http_path}</p>
               </td>
             </tr>
-          </>
-        )}
-      </tbody>
+          )}
+        </tbody>
+      </table>
     </>
   )
 }
 
-const Main = () => {
-  return (
-    <div>
-      <p>Main</p>
-    </div>
-  )
+const Main = ({ homePage }) => {
+  if (!homePage) {
+    return (
+      <div>
+        <p>Main</p>
+      </div>
+    )
+  } else {
+    return (
+      <div>
+        <p>Request being displayed</p>
+      </div>
+    )
+  }
 }
 
 const App = () => {
+  const [mongoRequests, setMongoRequests] = useState(mongoRequestsData)
+  const [pgRequests, setPgRequests] = useState(pgRequestsData)
+  const [homePage, setHomePage] = useState(null)
+  
+  const handleRequestClick = (mongoID) => {
+    console.log(mongoID)
+    setHomePage(mongoID)
+  }
+
   return (
     <div>
       <Header bin={bin} />
-      <SideBar requests={pgRequestsData} />
-      <Main />
+      <SideBar requests={pgRequests} handleRequestClick={handleRequestClick} />
+      <Main homePage={homePage}/>
     </div>
   )
 }
@@ -171,3 +191,5 @@ export default App;
 //     </tbody>
 //   </>
 // )
+
+
