@@ -1,158 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Table } from 'react-bootstrap'
 import requestService from './services/requests'
-
-const mongoRequestsData = [
-  {
-    id: 1,
-    requestHeaders: {
-      'host': 'requestbinder.com/aabioueriow9343',
-      'content-length': '97',
-      'accept': 'applic... */*',
-      'sec-fetch-site': 'same-origin',
-      'accept-language': 'en-GB,en;q=0.9',
-      'accept-encoding': 'gzip, deflate, br',
-      'sec-fetch-mode': 'cors',
-      'content-type': 'application/json',
-      'origin': 'https:....com',
-      'user-agent': 'Mozill...1.15',
-      'referer': 'https:...eea1',
-      'sec-fetch-dest': 'empty',
-    }
-  },
-  {
-    id: 2,
-    requestHeaders: {
-      'host': 'requestbinder.com/aabioueriow9343',
-      'content-length': '97',
-      'accept': 'applic... */*',
-      'sec-fetch-site': 'same-origin',
-      'accept-language': 'en-GB,en;q=0.9',
-      'accept-encoding': 'gzip, deflate, br',
-      'sec-fetch-mode': 'cors',
-      'content-type': 'application/json',
-      'origin': 'https:....com',
-      'user-agent': 'Mozill...1.15',
-      'referer': 'https:...eea1',
-      'sec-fetch-dest': 'empty',
-    }
-  },
-  {
-    id: 3,
-    requestHeaders: {
-      'host': 'requestbinder.com/aabioueriow9343',
-      'content-length': '97',
-      'accept': 'applic... */*',
-      'sec-fetch-site': 'same-origin',
-      'accept-language': 'en-GB,en;q=0.9',
-      'accept-encoding': 'gzip, deflate, br',
-      'sec-fetch-mode': 'cors',
-      'content-type': 'application/json',
-      'origin': 'https:....com',
-      'user-agent': 'Mozill...1.15',
-      'referer': 'https:...eea1',
-      'sec-fetch-dest': 'empty',
-    }
-  },
-  {
-    id: 4,
-    requestHeaders: {
-      'host': 'requestbinder.com/aabioueriow9343',
-      'content-length': '97',
-      'accept': 'applic... */*',
-      'sec-fetch-site': 'same-origin',
-      'accept-language': 'en-GB,en;q=0.9',
-      'accept-encoding': 'gzip, deflate, br',
-      'sec-fetch-mode': 'cors',
-      'content-type': 'application/json',
-      'origin': 'https:....com',
-      'user-agent': 'Mozill...1.15',
-      'referer': 'https:...eea1',
-      'sec-fetch-dest': 'empty'
-    }
-  },
-  {
-    id: 5,
-    requestHeaders: {
-      'host': 'requestbinder.com/aabioueriow9343',
-      'content-length': '97',
-      'accept': 'applic... */*',
-      'sec-fetch-site': 'same-origin',
-      'accept-language': 'en-GB,en;q=0.9',
-      'accept-encoding': 'gzip, deflate, br',
-      'sec-fetch-mode': 'cors',
-      'content-type': 'application/json',
-      'origin': 'https:....com',
-      'user-agent': 'Mozill...1.15',
-      'referer': 'https:...eea1',
-      'sec-fetch-dest': 'empty'
-    }
-  },
-  {
-    id: 6,
-    requestHeaders: {
-      'host': 'requestbinder.com/aabioueriow9343',
-      'content-length': '97',
-      'accept': 'applic... */*',
-      'sec-fetch-site': 'same-origin',
-      'accept-language': 'en-GB,en;q=0.9',
-      'accept-encoding': 'gzip, deflate, br',
-      'sec-fetch-mode': 'cors',
-      'content-type': 'application/json',
-      'origin': 'https:....com',
-      'user-agent': 'Mozill...1.15',
-      'referer': 'https:...eea1',
-      'sec-fetch-dest': 'empty'
-    }
-  },
-]
-
-const pgRequestsData = [
-  {
-    id: 1,
-    bin_id: 1,
-    mongo_id: 1,
-    http_method: 'GET',
-    http_path: '/webhook/aabioueriow9343'
-  },
-  {
-    id: 2,
-    bin_id: 1,
-    mongo_id: 2,
-    http_method: 'GET',
-    http_path: '/webhook/aabioueriow9343'
-  },
-  {
-    id: 3,
-    bin_id: 1,
-    mongo_id: 3,
-    http_method: 'GET',
-    http_path: '/webhook/aabioueriow9343'
-  },
-  {
-    id: 4,
-    bin_id: 1,
-    mongo_id: 4,
-    http_method: 'GET',
-    http_path: '/webhook/aabioueriow9343'
-  },
-  {
-    id: 5,
-    bin_id: 1,
-    mongo_id: 5,
-    http_method: 'GET',
-    http_path: '/webhook/aabioueriow9343'
-  },
-  {
-    id: 6,
-    bin_id: 1,
-    mongo_id: 6,
-    http_method: 'GET',
-    http_path: '/webhook/aabioueriow9343'
-  },
-]
-
-const bin = { id: 1, bin_path: 'aabioueriow9343', created_at: '09-13-2023' }
 
 const Header = ({ bin, newBin }) => {
   return (
@@ -164,7 +12,7 @@ const Header = ({ bin, newBin }) => {
           alt="request inspect logo" />
         </a>
       <div id="unique-url">
-        <p>Webhook URL: www.request-inspect.com/webhook/ {bin ? bin.bin_path : ""}</p>
+        <p>Webhook URL: www.request-inspect.com/webhook/{bin ? bin.bin_path : ""}</p>
       </div>
       <button onClick={newBin}>New Inspector</button>
     </div>
@@ -175,8 +23,8 @@ const SideBar = ({ pRequests, handleRequestClick }) => {
   return (
     <div id="side-bar">
       <div id="sidebar-header">
-        <p>HTTP Method</p>
-        <p>URL Path</p>
+        <p><strong>HTTP Method</strong></p>
+        <p id="sidebar-header_path"><strong>URL Path</strong></p>
       </div>
       <Table striped>
         <tbody>
@@ -186,7 +34,11 @@ const SideBar = ({ pRequests, handleRequestClick }) => {
                 className="sidebar-items"
                 onClick={() => handleRequestClick(request.mongo_id)} 
                 key={request.id}>
-                  <span className="http-method">{request.http_method}</span> {request.http_path}
+                <div className="sidebar-container">
+                  <span className="http-method">{request.http_method}</span>
+                  <span>{request.http_path}</span>
+                </div>
+
               </td>
             </tr>
           )}
@@ -200,18 +52,28 @@ const Main = ({ homePage }) => {
   if (!homePage) {
     return (
       <div id="main">
-        <p>No Request Selected</p>
+        <h3>Getting Started</h3>
+        <ul>
+          <li className="instructions">Click "New Inspector" to create a bin.</li>
+          <li className="instructions">Use "Webhook URL" as the endpoint for a webhook provider.</li>
+          <li className="instructions">Watch webhook requests come into the sidebar.</li>
+          <li className="instructions">Click on a request to view it's headers and body.</li>
+        </ul>
       </div>
     )
   }
   return (
     <div id="main">
-      <h2>Webhook Request Headers</h2>
       <table>
         <tbody>
+        <tr key="-1">
+              <td className="header-info header-title">Header</td> 
+              <td className="header-info header-title">Value</td>
+            </tr>
           {Object.keys(homePage).map((header, idx) =>
             <tr key={idx}>
-              <td className="header-info">"{header}": "{homePage[header]}"</td>
+              <td className="header-info">"{header}"</td> 
+              <td className="header-info">"{homePage[header]}"</td>
             </tr>
           )}
         </tbody>
@@ -221,10 +83,10 @@ const Main = ({ homePage }) => {
 }
 
 const App = () => {
-  const [mongoRequests, setMongoRequests] = useState(mongoRequestsData)
-  const [pgRequests, setPgRequests] = useState(pgRequestsData)
+  const [mongoRequests, setMongoRequests] = useState([])
+  const [pgRequests, setPgRequests] = useState([])
   const [homePage, setHomePage] = useState(null)
-  const [bin, setBin] = useState([])
+  const [bin, setBin] = useState(null)
 
   const handleRequestClick = (mongoID) => {
     console.log(mongoID)
@@ -243,7 +105,11 @@ const App = () => {
 
   const newBin = async () => {
     let newBin = await requestService.createBin()
+    const mData = requestService.fetchMongoData(newBin)
+    const pData = requestService.fetchPgData()
     setBin(newBin)
+    setMongoRequests(mData)
+    setPgRequests(pData)
   }
 
   return (

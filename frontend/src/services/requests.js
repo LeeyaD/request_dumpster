@@ -84,14 +84,14 @@ const pgRequestsData = [
     id: 2,
     bin_id: 2,
     mongo_id: 2,
-    http_method: 'GET',
+    http_method: 'POST',
     http_path: '/webhook/bin_number/request_number'
   },
   {
     id: 3,
     bin_id: 3,
     mongo_id: 3,
-    http_method: 'GET',
+    http_method: 'DELETE',
     http_path: '/webhook/bin_number/request_number'
   },
   {
@@ -110,6 +110,13 @@ const createBin = () => {
   // return request.then(response => response.data)
   return bin
 }
+const fetchMongoData = () => {
+  return mongoRequestsData
+}
+
+const fetchPgData = () => {
+  return pgRequestsData
+}
 
 const getPgRequests = () => {
   // const request = axios.get(baseUrl) // get from the non-webhook url?
@@ -117,6 +124,6 @@ const getPgRequests = () => {
   return pgRequestsData
 }
 
-const exportable = { getPgRequests, createBin }
+const exportable = { getPgRequests, createBin, fetchMongoData, fetchPgData }
 
 export default exportable

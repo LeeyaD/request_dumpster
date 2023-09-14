@@ -2,6 +2,10 @@ body, html {
 	margin: 0;
 	padding: 0;
 	height: 100%;
+	color: #343440;
+	font-family: 'Barlow', sans-serif;
+	font-family: 'Inter', sans-serif;
+	font-size: 14px;
 }
 
 #root {
@@ -72,20 +76,29 @@ button:focus {
 	border-right: 1px solid #60585636;
 	background-color: #4949491f;
 	height: 100%;
+	width: 500px;
 	box-shadow: 2px 0px 6px #60585636;
 }
 
 #sidebar-header {
 	display: flex;
 	justify-content: space-between;
-	padding: 0 30px;
+	padding: 0 15px;
 	border-bottom: 1px solid #60585636;
 }
 
+#sidebar-header_path {
+	margin-right: 90px;
+}
+.sidebar-container {
+	display: flex;
+	justify-content: space-between;
+}
+
 .sidebar-items {
+	width: 450px;
 	padding: 10px 15px;
 	border-bottom: 1px solid #60585636;
-	width: 300px;
 }
 
 .sidebar-items:hover {
@@ -110,5 +123,17 @@ button:focus {
 }
 
 .header-info {
+	text-align: left;
+	border: 1px solid #60585636;
+	padding: 5px 10px;
+	width: 300px;
+}
+
+.header-title {
 	text-align: center;
+	font-weight: 900;
+}
+
+.instructions {
+	margin-bottom: 10px;
 }
