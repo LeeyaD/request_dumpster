@@ -6,11 +6,11 @@ const Header = ({ bin, newBin }) => {
   return (
     <div id="header">
       <a href="/">
-        <img 
-          id="logo" 
-          src="assets/request_inspect_logo.png" 
+        <img
+          id="logo"
+          src="assets/request_inspect_logo.png"
           alt="request inspect logo" />
-        </a>
+      </a>
       <div id="unique-url">
         <p>Webhook URL: www.request-inspect.com/webhook/{bin ? bin.bin_path : ""}</p>
       </div>
@@ -30,9 +30,9 @@ const SideBar = ({ pRequests, handleRequestClick }) => {
         <tbody>
           {pRequests.map(request =>
             <tr key={request.id}>
-              <td 
+              <td
                 className="sidebar-items"
-                onClick={() => handleRequestClick(request.mongo_id)} 
+                onClick={() => handleRequestClick(request.mongo_id)}
                 key={request.id}>
                 <div className="sidebar-container">
                   <span className="http-method">{request.http_method}</span>
@@ -66,13 +66,13 @@ const Main = ({ homePage }) => {
     <div id="main">
       <table>
         <tbody>
-        <tr key="-1">
-              <td className="header-info header-title">Header</td> 
-              <td className="header-info header-title">Value</td>
-            </tr>
+          <tr key="-1">
+            <td className="header-info header-title">Header</td>
+            <td className="header-info header-title">Value</td>
+          </tr>
           {Object.keys(homePage).map((header, idx) =>
             <tr key={idx}>
-              <td className="header-info">"{header}"</td> 
+              <td className="header-info">"{header}"</td>
               <td className="header-info">"{homePage[header]}"</td>
             </tr>
           )}
@@ -117,7 +117,7 @@ const App = () => {
       <Header bin={bin} newBin={newBin} />
       <div id="container">
         <SideBar pRequests={pgRequests} handleRequestClick={handleRequestClick} />
-        <Main homePage={homePage}/>
+        <Main homePage={homePage} />
       </div>
     </>
   )
