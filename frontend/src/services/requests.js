@@ -1,5 +1,7 @@
-// import axios from 'axios'
-// const baseUrl = '/api/contacts'
+import ReactDOM from 'react-dom/client'
+import axios from 'axios'
+import App from '..'
+
 
 const mongoRequestsData = [
   {
@@ -72,58 +74,51 @@ const mongoRequestsData = [
   },
 ]
 
-const pgRequestsData = [
-  {
-    id: 1,
-    bin_id: 1,
-    mongo_id: 1,
-    http_method: 'GET',
-    http_path: '/webhook/bin_number/request_number'
-  },
-  {
-    id: 2,
-    bin_id: 2,
-    mongo_id: 2,
-    http_method: 'POST',
-    http_path: '/webhook/bin_number/request_number'
-  },
-  {
-    id: 3,
-    bin_id: 3,
-    mongo_id: 3,
-    http_method: 'DELETE',
-    http_path: '/webhook/bin_number/request_number'
-  },
-  {
-    id: 4,
-    bin_id: 4,
-    mongo_id: 4,
-    http_method: 'GET',
-    http_path: '/webhook/bin_number/request_number'
-  },
-]
+// const pgRequestsData = [
+//   {
+//     id: 1,
+//     bin_id: 1,
+//     mongo_id: 1,
+//     http_method: 'GET',
+//     http_path: '/webhook/bin_number/request_number'
+//   },
+//   {
+//     id: 2,
+//     bin_id: 2,
+//     mongo_id: 2,
+//     http_method: 'POST',
+//     http_path: '/webhook/bin_number/request_number'
+//   },
+//   {
+//     id: 3,
+//     bin_id: 3,
+//     mongo_id: 3,
+//     http_method: 'DELETE',
+//     http_path: '/webhook/bin_number/request_number'
+//   },
+//   {
+//     id: 4,
+//     bin_id: 4,
+//     mongo_id: 4,
+//     http_method: 'GET',
+//     http_path: '/webhook/bin_number/request_number'
+//   },
+// ]
 
-const bin = { id: 1, bin_path: 'aabioueriow9343', created_at: '09-13-2023' }
+// const bin = { id: 1, bin_path: 'aabioueriow9343', created_at: '09-13-2023' }
 
-const createBin = () => {
-  // const request = axios.post(baseURL/newBin)
-  // return request.then(response => response.data)
-  return bin
+const createBin = async () => {
+  const response = await axios.post('http://localhost:3001/new_bin')
+  return response.data
 }
 const fetchMongoData = () => {
   return mongoRequestsData
 }
 
-const fetchPgData = () => {
-  return pgRequestsData
-}
+// const fetchPgData = () => {
+//   return pgRequestsData
+// }
 
-const getPgRequests = () => {
-  // const request = axios.get(baseUrl) // get from the non-webhook url?
-  // return request.then(response => response.data)
-  return pgRequestsData
-}
-
-const exportable = { getPgRequests, createBin, fetchMongoData, fetchPgData }
+const exportable = { createBin, fetchMongoData }
 
 export default exportable

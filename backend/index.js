@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const Request = require('./models/request')
 const { Client } = require('pg')
 const app = express()
+const cors = require('cors')
+app.use(cors());
 
 mongoose.set('strictQuery', false)
 console.log('### CONNECTING TO MONGO...')
@@ -50,15 +52,15 @@ const registerRequest = async (request, response, binPath, method) => {
 
   const savedRequest = await req.save()
   console.log('### SAVED REQUEST TO MONGO', binPath)
-  
+
   const pg = connectToPg()
   await pg.connect()
   console.log('### Postgres CONNECTED');
-  
-  
+
+
   let binId;
   await pg.query('SELECT id FROM bin WHERE bin_path = $1', [binPath])
-    .then(result => binId = result.rows[0].id) 
+    .then(result => binId = result.rows[0].id)
 
   console.log("binId", binId)
   // mongoId: used to get specific request from Mongo DB (because Mongo's id is garbage format)
@@ -104,7 +106,7 @@ app.post('/new_bin', async (request, response) => {
   const binPath = generateKey(15)
   const pg = connectToPg()
   await pg.connect()
-  console.log('### Postgres CONNECTED');
+  console.log('### Postgres CONNECTED 109');
   pg.query('INSERT INTO bin (bin_path) values ($1)', [binPath])
     .then(() => pg.end())
   response.redirect(`/${binPath}`);
@@ -114,17 +116,17 @@ app.get('/:bin_path', async (request, response) => {
   const binPath = request.params.bin_path
   const pg = connectToPg()
   await pg.connect()
-  console.log('### Postgres CONNECTED');
+  console.log('### Postgres CONNECTED 119');
 
   let binId;
   await pg.query('SELECT id FROM bin WHERE bin_path = $1', [binPath])
-    .then(result => binId = result.rows[0].id) 
+    .then(result => binId = result.rows[0].id)
 
   pg.query('SELECT * FROM requests WHERE bin_id = $1', [binId])
     .then((result) => {
       pg.end()
       console.log(result.rows)
-      response.send(result.rows);
+      response.send({ requestData: result.rows, path: binPath })
     })
 })
 

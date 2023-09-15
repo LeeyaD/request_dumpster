@@ -2,6 +2,16 @@ import { useState } from "react";
 import { Table } from 'react-bootstrap'
 import requestService from './services/requests'
 
+// "react-router-dom": "^6.14.2", ---> package.json
+
+
+// import ReactDOM from 'react-dom/client'
+// import App from './App'
+// import {
+//   BrowserRouter as Router
+// } from 'react-router-dom'
+// ReactDOM.createRoot(document.getElementById('root')).render(<Router><App /></Router>)
+
 const Header = ({ bin, newBin }) => {
   return (
     <div id="header">
@@ -12,7 +22,7 @@ const Header = ({ bin, newBin }) => {
           alt="request inspect logo" />
       </a>
       <div id="unique-url">
-        <p>Webhook URL: www.request-inspect.com/webhook/{bin ? bin.bin_path : ""}</p>
+        <p>Webhook URL: www.request-inspect.com/webhook/{bin ? bin : ""}</p>
       </div>
       <button onClick={newBin}>New Inspector</button>
     </div>
@@ -104,12 +114,15 @@ const App = () => {
   }
 
   const newBin = async () => {
-    let newBin = await requestService.createBin()
-    const mData = requestService.fetchMongoData(newBin)
-    const pData = requestService.fetchPgData()
-    setBin(newBin)
-    setMongoRequests(mData)
-    setPgRequests(pData)
+    let binObj = await requestService.createBin()
+    let pgData = binObj.requestData
+    // const mData = requestService.fetchMongoData()
+    // const pData = requestService.fetchPgData()
+    setBin(binObj.path)
+    setPgRequests(pgData)
+    console.log(pgData)
+    // setMongoRequests(mData)
+    // setPgRequests(pData)
   }
 
   return (
