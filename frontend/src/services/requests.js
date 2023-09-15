@@ -1,7 +1,4 @@
-import ReactDOM from 'react-dom/client'
 import axios from 'axios'
-import App from '..'
-
 
 const mongoRequestsData = [
   {
@@ -107,18 +104,36 @@ const mongoRequestsData = [
 
 // const bin = { id: 1, bin_path: 'aabioueriow9343', created_at: '09-13-2023' }
 
+// creates a new bin and pings it, before returning
 const createBin = async () => {
-  const response = await axios.post('http://localhost:3001/new_bin')
+  const response1 = await axios.post('http://localhost:3001/new_bin')
+  const bin = response1.data.path
+  // handled by registerRequests in backend
+  await axios({
+    method: 'post',
+    url: `http://localhost:3001/webhook/${bin}`,
+    data: {
+      firstName: 'Fred',
+      lastName: 'Flintstone'
+    }
+  });
+  return response1.data
+}
+
+// fetch mongo data based on clicked request (untested)
+const fetchMongoData = async (bin_path, mongo_id) => {
+  const response = await axios.get(`http://localhost:3001/${bin_path}/${mongo_id}`)
+  console.log(response.data)
   return response.data
 }
-const fetchMongoData = () => {
-  return mongoRequestsData
+
+// fetch PG Requests row that matches current bin path (should contain the auto ping on new bin creation)
+const fetchPgData = async (binPath) => {
+  const response = await axios.get(`http://localhost:3001/${binPath}`)
+  console.log(response.data)
+  return response.data
 }
 
-// const fetchPgData = () => {
-//   return pgRequestsData
-// }
-
-const exportable = { createBin, fetchMongoData }
+const exportable = { createBin, fetchMongoData, fetchPgData }
 
 export default exportable

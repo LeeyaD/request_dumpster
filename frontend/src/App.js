@@ -1,18 +1,24 @@
 import { useState } from "react";
 import { Table } from 'react-bootstrap'
+import {
+  Routes,
+  Route,
+  useNavigate,
+  BrowserRouter
+} from 'react-router-dom'
 import requestService from './services/requests'
 
-// "react-router-dom": "^6.14.2", ---> package.json
-
-
-// import ReactDOM from 'react-dom/client'
-// import App from './App'
-// import {
-//   BrowserRouter as Router
-// } from 'react-router-dom'
-// ReactDOM.createRoot(document.getElementById('root')).render(<Router><App /></Router>)
+const Button = (props) => {
+  return (
+    <button onClick={props.handleClick}>
+      {props.text}
+    </button>
+  )
+}
 
 const Header = ({ bin, newBin }) => {
+  console.log(bin)
+  const navigate = useNavigate();
   return (
     <div id="header">
       <a href="/">
@@ -24,12 +30,17 @@ const Header = ({ bin, newBin }) => {
       <div id="unique-url">
         <p>Webhook URL: www.request-inspect.com/webhook/{bin ? bin : ""}</p>
       </div>
-      <button onClick={newBin}>New Inspector</button>
+      <Button handleClick={async () => {
+        await newBin()
+        navigate(`/${bin}`)
+      }} text='New Inspector' />
     </div>
   )
 }
 
-const SideBar = ({ pRequests, handleRequestClick }) => {
+const SideBar = ({ bin, pRequests, handleRequestClick }) => {
+  console.log(bin)
+  console.log(pRequests.requestData)
   return (
     <div id="side-bar">
       <div id="sidebar-header">
@@ -38,8 +49,8 @@ const SideBar = ({ pRequests, handleRequestClick }) => {
       </div>
       <Table striped>
         <tbody>
-          {pRequests.map(request =>
-            <tr key={request.id}>
+          {pRequests.requestData.map((request, idx) =>
+            <tr key={idx}>
               <td
                 className="sidebar-items"
                 onClick={() => handleRequestClick(request.mongo_id)}
@@ -67,7 +78,7 @@ const Main = ({ homePage }) => {
           <li className="instructions">Click "New Inspector" to create a bin.</li>
           <li className="instructions">Use "Webhook URL" as the endpoint for a webhook provider.</li>
           <li className="instructions">Watch webhook requests come into the sidebar.</li>
-          <li className="instructions">Click on a request to view it's headers and body.</li>
+          <li className="instructions">Click on a request to view its headers and body.</li>
         </ul>
       </div>
     )
@@ -80,10 +91,10 @@ const Main = ({ homePage }) => {
             <td className="header-info header-title">Header</td>
             <td className="header-info header-title">Value</td>
           </tr>
-          {Object.keys(homePage).map((header, idx) =>
+          {Object.keys(homePage).map((key, idx) =>
             <tr key={idx}>
-              <td className="header-info">"{header}"</td>
-              <td className="header-info">"{homePage[header]}"</td>
+              <td className="header-info">"{key}"</td>
+              <td className="header-info">"{homePage[key]}"</td>
             </tr>
           )}
         </tbody>
@@ -93,6 +104,10 @@ const Main = ({ homePage }) => {
 }
 
 const App = () => {
+  // all states are 'reset' to default value on URL redirect or page refresh
+  // state is only set to meaningful value on button click, which does not occur immediately on page load
+  // need to have URL redirect in order to have a URL we can refresh, to get new requests to show up
+      // other way would be to wait for them to pop up (some async thing?)
   const [mongoRequests, setMongoRequests] = useState([])
   const [pgRequests, setPgRequests] = useState([])
   const [homePage, setHomePage] = useState(null)
@@ -100,38 +115,53 @@ const App = () => {
 
   const handleRequestClick = (mongoID) => {
     console.log(mongoID)
-    let requestData = searchMongo(mongoID, mongoRequests)
-    setHomePage(requestData)
+    console.log(mongoRequests[0])
+    setHomePage(mongoRequests[0])
   }
 
-  const searchMongo = (mongoID, mongoRequests) => {
-    console.log(mongoRequests);
-    let singleRequest = mongoRequests.find(request => {
-      return request.id === mongoID
-    });
-    console.log(singleRequest.requestHeaders);
-    return singleRequest.requestHeaders;
-  }
+  // const searchMongo = (mongoID, mongoRequests) => {
+  //   let singleRequest = mongoRequests.find(request => {
+  //     return request.id === mongoID
+  //   });
+  //   console.log(singleRequest);
+  //   return singleRequest.requestHeaders;
+  // }
 
   const newBin = async () => {
     let binObj = await requestService.createBin()
-    let pgData = binObj.requestData
-    // const mData = requestService.fetchMongoData()
-    // const pData = requestService.fetchPgData()
+    const pData = await requestService.fetchPgData(binObj.path)
+    console.log(pData)
+    console.log(pData.requestData[0].mongo_id)
+    const mData = await requestService.fetchMongoData(binObj.path, pData.requestData[0].mongo_id)
     setBin(binObj.path)
-    setPgRequests(pgData)
-    console.log(pgData)
-    // setMongoRequests(mData)
-    // setPgRequests(pData)
+    console.log(pData)
+    setMongoRequests(mData)
+    setPgRequests(pData)
   }
 
   return (
     <>
-      <Header bin={bin} newBin={newBin} />
-      <div id="container">
-        <SideBar pRequests={pgRequests} handleRequestClick={handleRequestClick} />
-        <Main homePage={homePage} />
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={
+            <>
+              <Header bin={bin} newBin={newBin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
+              <div id="container">
+                <Main homePage={homePage} />
+              </div>
+            </>
+            } />
+            <Route path="/:bin_path" element={
+              <>
+                <Header bin={bin} newBin={newBin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
+                <div id="container">
+                  <SideBar bin={bin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
+                  <Main homePage={homePage} />
+                </div>
+              </>
+            } />
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }
