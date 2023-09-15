@@ -1,6 +1,10 @@
 const mongoose = require('mongoose')
 
 const requestSchema = new mongoose.Schema({
+  key: {
+    type: String,
+    required: true
+  },
   header: {
     type: String,
     required: true
