@@ -5,6 +5,7 @@ const { Client } = require('pg')
 const app = express()
 const cors = require('cors')
 app.use(cors());
+app.use(express.json())
 
 mongoose.set('strictQuery', false)
 console.log('### CONNECTING TO MONGO...')
@@ -43,11 +44,11 @@ const registerRequest = async (request, response, binPath, method) => {
   const stringRequestHeader = JSON.stringify(request.headers);
   const stringRequestBody = JSON.stringify(request.body);
   const newKey = generateKey(15);
-  console.log(newKey)
+  // console.log(`#### Request Body: ${stringRequestBody}`)
   const req = new Request({
     key: newKey,
     header: stringRequestHeader,
-    body: stringRequestHeader
+    body: stringRequestBody,
   });
 
   const savedRequest = await req.save()
@@ -74,7 +75,7 @@ const registerRequest = async (request, response, binPath, method) => {
     'VALUES ($1, $2, $3, $4, $5)', [binId, mongoId, mongoPath, httpMethod, httpPath])
     .then(() => pg.end())
 
-  response.status(201).send()
+  response.status(201).send('### SOMETHING FOR TERMINAL l.79###')
 }
 
 app.get('/', (request, response) => {
@@ -112,11 +113,23 @@ app.post('/new_bin', async (request, response) => {
   response.redirect(`/${binPath}`);
 })
 
+///// FETCH REQUESTS 
+app.get('/:bin_path/:mongo_id', async (request, response) => {
+  const mongoId = request.params.mongo_id
+  // we are supposed to search by key?
+  let singleRequest = await Request.find({key:`${mongoId}`}).exec();
+  console.log('### Mongo QUERIED 120');
+  console.log(mongoId)
+  console.log(singleRequest)
+  response.send(singleRequest)
+})
+
+///// FETCH REQUESTS TABLE
 app.get('/:bin_path', async (request, response) => {
   const binPath = request.params.bin_path
   const pg = connectToPg()
   await pg.connect()
-  console.log('### Postgres CONNECTED 119');
+  console.log('### Postgres CONNECTED 130');
 
   let binId;
   await pg.query('SELECT id FROM bin WHERE bin_path = $1', [binPath])
