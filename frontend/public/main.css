@@ -15,15 +15,72 @@ body, html {
 
 /* Header */
 
+#header-container {
+	background-color: #4141ef;
+	box-shadow: 0 4px 8px #605856;
+	color: aliceblue;
+
+	padding-bottom: 10px;
+}
+
+#url-container {
+	text-align: center;
+	margin: 20px auto;
+	width: 600px;
+  font-size: 16px;
+  padding: 12px 24px;
+  text-decoration: none;
+  border-radius: 30px;
+  cursor: pointer;
+  background-color: #4949498e;
+  color: #fff;
+  border: 2px solid #ffffffa8;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+#url-container:hover {
+  background-color: #2980b9;
+  border-color: #3498db;
+}
+
+#filler {
+	height: 20px;
+	text-align: center;
+	margin: 20px auto;
+	width: 600px;
+  font-size: 16px;
+  padding: 12px 24px;
+  text-decoration: none;
+  border-radius: 30px;
+  cursor: pointer;
+  background-color: #4949498e;
+  color: #fff;
+  border: 2px solid #ffffffa8;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+	color: #ffffff74;
+}
+
+#message {
+	position: absolute;
+	left: 50%;
+	top: 80px;
+}
+
+.invisible {
+	display: none;
+}
+
+#filler:hover {
+	cursor: default;
+}
+
 #header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	height: 150px;
 	padding: 0 100px;
-	background-color: #4141ef;
-	color: aliceblue;
-	box-shadow: 0 4px 8px #605856;
+	margin-bottom: -50px;
 }
 
 #logo {
@@ -133,4 +190,13 @@ button:focus {
 
 .instructions {
 	margin-bottom: 10px;
+}
+
+#body-table {
+	margin-top: 50px;
+	width: 650px;
+}
+
+.body-row {
+	min-height: 200px;
 }
