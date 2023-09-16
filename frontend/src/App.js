@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table } from 'react-bootstrap'
 import {
   Routes,
@@ -17,7 +17,7 @@ const Button = (props) => {
 }
 
 const Header = ({ bin, newBin }) => {
-  console.log(bin)
+  console.log("bin ln 21:", bin)
   const navigate = useNavigate();
   return (
     <div id="header">
@@ -28,24 +28,37 @@ const Header = ({ bin, newBin }) => {
           alt="request inspect logo" />
       </a>
       <div id="unique-url">
-        <p>Webhook URL: www.request-inspect.com/webhook/{bin ? bin : ""}</p>
+        <p>{bin ? "Webhook URL: www.request-inspect.com/webhook/" + bin : ""}</p>
       </div>
       <Button handleClick={async () => {
-        await newBin()
-        navigate(`/${bin}`)
+        const binPath = await newBin()
+        navigate(`/${binPath}`)
       }} text='New Inspector' />
     </div>
   )
 }
 
 const SideBar = ({ bin, pRequests, handleRequestClick }) => {
-  console.log(bin)
-  console.log(pRequests.requestData)
+  console.log("bin ln 43:", bin)
+  console.log("pRequests.requestData ln 44:", pRequests.requestData)
+  if (!pRequests.requestData) {
+    return (
+      <div id="side-bar">
+      <div id="sidebar-header">
+        <p><strong>HTTP Method</strong></p>
+        <p id="sidebar-header_path"><strong>URL Path</strong></p>
+      </div>
+      <Table striped>
+        <tbody></tbody>
+      </Table>
+    </div>
+    )
+  }
   return (
     <div id="side-bar">
       <div id="sidebar-header">
         <p><strong>HTTP Method</strong></p>
-        <p id="sidebar-header_path"><strong>URL Path</strong></p>
+        <p id="sidebar-header_path"><strong>Time of Request</strong></p>
       </div>
       <Table striped>
         <tbody>
@@ -57,9 +70,8 @@ const SideBar = ({ bin, pRequests, handleRequestClick }) => {
                 key={request.id}>
                 <div className="sidebar-container">
                   <span className="http-method">{request.http_method}</span>
-                  <span>{request.http_path}</span>
+                  <span>{request.recieved_at}</span>
                 </div>
-
               </td>
             </tr>
           )}
@@ -104,56 +116,52 @@ const Main = ({ homePage }) => {
 }
 
 const App = () => {
-  // all states are 'reset' to default value on URL redirect or page refresh
-  // state is only set to meaningful value on button click, which does not occur immediately on page load
-  // need to have URL redirect in order to have a URL we can refresh, to get new requests to show up
-      // other way would be to wait for them to pop up (some async thing?)
-  const [mongoRequests, setMongoRequests] = useState([])
   const [pgRequests, setPgRequests] = useState([])
   const [homePage, setHomePage] = useState(null)
   const [bin, setBin] = useState(null)
 
-  const handleRequestClick = (mongoID) => {
-    console.log(mongoID)
-    console.log(mongoRequests[0])
-    setHomePage(mongoRequests[0])
+  useEffect(() => {
+    const currentPath = window.location.pathname
+    const currentBinPath = currentPath.split("/")[1]
+    if (currentBinPath && currentBinPath.length === 15) {
+      fetchPgData(currentBinPath)
+    }
+  }, [])
+
+  const fetchPgData = async (currentBinPath) => {
+    const pData = await requestService.fetchPgData(currentBinPath)
+    setBin(currentBinPath)
+    setPgRequests(pData)
   }
 
-  // const searchMongo = (mongoID, mongoRequests) => {
-  //   let singleRequest = mongoRequests.find(request => {
-  //     return request.id === mongoID
-  //   });
-  //   console.log(singleRequest);
-  //   return singleRequest.requestHeaders;
-  // }
+  const handleRequestClick = async (mongoId) => {
+    const currentPath = window.location.pathname
+    const currentBinPath = currentPath.split("/")[1]
+    const mData = await requestService.fetchMongoData(currentBinPath, mongoId)
+    setHomePage(mData[0])
+  }
 
   const newBin = async () => {
     let binObj = await requestService.createBin()
-    const pData = await requestService.fetchPgData(binObj.path)
-    console.log(pData)
-    console.log(pData.requestData[0].mongo_id)
-    const mData = await requestService.fetchMongoData(binObj.path, pData.requestData[0].mongo_id)
-    setBin(binObj.path)
-    console.log(pData)
-    setMongoRequests(mData)
-    setPgRequests(pData)
+    fetchPgData(binObj.path)
+    return binObj.path
   }
 
   return (
     <>
       <BrowserRouter>
+        <Header bin={bin} newBin={newBin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
         <Routes>
           <Route path="/" element={
             <>
-              <Header bin={bin} newBin={newBin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
               <div id="container">
+                <SideBar bin={""} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
                 <Main homePage={homePage} />
               </div>
             </>
             } />
             <Route path="/:bin_path" element={
               <>
-                <Header bin={bin} newBin={newBin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
                 <div id="container">
                   <SideBar bin={bin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
                   <Main homePage={homePage} />
