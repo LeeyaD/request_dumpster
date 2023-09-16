@@ -87,9 +87,6 @@ button:focus {
 	border-bottom: 1px solid #60585636;
 }
 
-#sidebar-header_path {
-	margin-right: 90px;
-}
 .sidebar-container {
 	display: flex;
 	justify-content: space-between;
