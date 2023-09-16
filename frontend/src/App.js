@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Table } from 'react-bootstrap'
 import {
   Routes,
@@ -17,30 +17,51 @@ const Button = (props) => {
 }
 
 const Header = ({ bin, newBin }) => {
-  console.log("bin ln 21:", bin)
   const navigate = useNavigate();
+  const messageRef = useRef();
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        messageRef.current.className = ""
+        setTimeout(() => {
+          messageRef.current.className = "invisible"
+        }, 2500)
+      })
+      .catch((error) => {
+        console.error('Error copying to clipboard:', error);
+      });
+  };
+
   return (
-    <div id="header">
-      <a href="/">
-        <img
-          id="logo"
-          src="assets/request_inspect_logo.png"
-          alt="request inspect logo" />
-      </a>
-      <div id="unique-url">
-        <p>{bin ? "Webhook URL: www.request-inspect.com/webhook/" + bin : ""}</p>
+    <div id="header-container">
+      <div id="header">
+        <a href="/">
+          <img
+            id="logo"
+            src="assets/request_inspect_logo.png"
+            alt="request inspect logo" />
+        </a>
+        <Button handleClick={async () => {
+          const binPath = await newBin()
+          navigate(`/${binPath}`)
+        }} text='New Inspector' />
       </div>
-      <Button handleClick={async () => {
-        const binPath = await newBin()
-        navigate(`/${binPath}`)
-      }} text='New Inspector' />
+        <p ref={messageRef} id="message" className="fading-element invisible">copied!</p>
+        {bin ? (
+          <p 
+          onClick={() => copyToClipboard(`www.request-inspect.com/webhook/${bin}`)}
+            id="url-container">
+              {"Webhook URL: www.request-inspect.com/webhook/" + bin}
+          </p>
+        ) : (
+          <p id="filler">Webhook URL will appear here upon bin creation</p>  
+        )}
     </div>
   )
 }
 
 const SideBar = ({ bin, pRequests, handleRequestClick }) => {
-  console.log("bin ln 43:", bin)
-  console.log("pRequests.requestData ln 44:", pRequests.requestData)
   if (!pRequests.requestData) {
     return (
       <div id="side-bar">
@@ -95,6 +116,10 @@ const Main = ({ homePage }) => {
       </div>
     )
   }
+
+  const headers = Object.keys(JSON.parse(homePage.header))
+  const values = Object.values(JSON.parse(homePage.header))
+
   return (
     <div id="main">
       <table>
@@ -103,12 +128,22 @@ const Main = ({ homePage }) => {
             <td className="header-info header-title">Header</td>
             <td className="header-info header-title">Value</td>
           </tr>
-          {Object.keys(homePage).map((key, idx) =>
+          {headers.map((header, idx) =>
             <tr key={idx}>
-              <td className="header-info">"{key}"</td>
-              <td className="header-info">"{homePage[key]}"</td>
+              <td className="header-info">"{header}"</td>
+              <td className="header-info">"{values[idx]}"</td>
             </tr>
           )}
+        </tbody>
+      </table>
+      <table id="body-table">
+        <tbody>
+          <tr key="-1">
+            <td className="header-info header-title">Body</td>
+          </tr>
+            <tr id="body-row">
+              <td className="header-info">{homePage.body}</td>
+            </tr>
         </tbody>
       </table>
     </div>
@@ -144,6 +179,7 @@ const App = () => {
   const newBin = async () => {
     let binObj = await requestService.createBin()
     fetchPgData(binObj.path)
+    setHomePage(null)
     return binObj.path
   }
 
