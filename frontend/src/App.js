@@ -44,7 +44,7 @@ const Header = ({ bin, newBin }) => {
         </a>
         <Button handleClick={async () => {
           const binPath = await newBin()
-          navigate(`/${binPath}`)
+          navigate(`${binPath}`)
         }} text='New Inspector' />
       </div>
         <p ref={messageRef} id="message" className="fading-element invisible">copied!</p>
@@ -61,7 +61,7 @@ const Header = ({ bin, newBin }) => {
   )
 }
 
-const SideBar = ({ bin, pRequests, handleRequestClick }) => {
+const SideBar = ({ pRequests, handleRequestClick }) => {
   if (!pRequests.requestData) {
     return (
       <div id="side-bar">
@@ -157,6 +157,7 @@ const App = () => {
 
   useEffect(() => {
     const currentPath = window.location.pathname
+    console.log(currentPath)
     const currentBinPath = currentPath.split("/")[1]
     if (currentBinPath && currentBinPath.length === 15) {
       fetchPgData(currentBinPath)
@@ -165,6 +166,7 @@ const App = () => {
 
   const fetchPgData = async (currentBinPath) => {
     const pData = await requestService.fetchPgData(currentBinPath)
+    console.log(pData)
     setBin(currentBinPath)
     setPgRequests(pData)
   }
@@ -188,18 +190,18 @@ const App = () => {
       <BrowserRouter>
         <Header bin={bin} newBin={newBin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
         <Routes>
-          <Route path="/" element={
-            <>
-              <div id="container">
-                <SideBar bin={""} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
-                <Main homePage={homePage} />
-              </div>
-            </>
-            } />
-            <Route path="/:bin_path" element={
+            <Route path="/:bin" element={
               <>
                 <div id="container">
-                  <SideBar bin={bin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
+                  <SideBar pRequests={pgRequests} handleRequestClick={handleRequestClick} />
+                  <Main homePage={homePage} />
+                </div>
+              </>
+            } />
+            <Route path="/" element={
+              <>
+                <div id="container">
+                  <SideBar pRequests={pgRequests} handleRequestClick={handleRequestClick} />
                   <Main homePage={homePage} />
                 </div>
               </>

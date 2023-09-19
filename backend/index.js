@@ -3,11 +3,12 @@ const mongoose = require('mongoose')
 const Request = require('./models/request')
 const { Client } = require('pg')
 const app = express()
+app.use(express.static('build'));
+app.use('/:bin_id', express.static('build'));
 const cors = require('cors')
 app.use(cors());
 app.use(express.json())
-const path = require('path');
-app.use(express.static(path.join(__dirname, "build")));
+// const path = require('path');
 
 mongoose.set('strictQuery', false)
 console.log('### CONNECTING TO MONGO...')
@@ -41,8 +42,13 @@ function generateKey(length) {
   return result;
 }
 
+// app.get('/', async (request, response) => {
+//   response.status(200);
+// })
+
 const registerRequest = async (request, response, binPath, method) => {
   console.log('### MONGO CONNECTED -- ACCEPT REQUEST');
+  console.log(binPath)
   const stringRequestHeader = JSON.stringify(request.headers);
   const stringRequestBody = JSON.stringify(request.body);
   const newKey = generateKey(15);
@@ -63,7 +69,10 @@ const registerRequest = async (request, response, binPath, method) => {
 
   let binId;
   await pg.query('SELECT id FROM bin WHERE bin_path = $1', [binPath])
-    .then(result => binId = result.rows[0].id)
+    .then(result => {
+      console.log(result.rows)
+      binId = result.rows[0].id
+    })
 
   console.log("binId", binId)
   // mongoId: used to get specific request from Mongo DB (because Mongo's id is garbage format)
@@ -80,16 +89,16 @@ const registerRequest = async (request, response, binPath, method) => {
   response.status(201).send('### SOMETHING FOR TERMINAL l.79###')
 }
 
-app.get('/', (request, response) => {
-  response.send('<h1>Hello World!</h1>')
-})
-
+// app.get('/', (request, response) => {
+//   response.send('<h1>Hello World!</h1>')
+// })
 
 app.get('/webhook/:bin_path', async (request, response) => {
   registerRequest(request, response, request.params.bin_path, "GET")
 })
 
 app.post('/webhook/:bin_path', async (request, response) => {
+  console.log(request.params.bin_path)
   registerRequest(request, response, request.params.bin_path, "POST")
 })
 
@@ -105,33 +114,41 @@ app.patch('/webhook/:bin_path', async (request, response) => {
   registerRequest(request, response, request.params.bin_path, "PATCH")
 })
 
-app.post('/new_bin', async (request, response) => {
-  const binPath = generateKey(15)
-  const pg = connectToPg()
-  await pg.connect()
-  console.log('### Postgres CONNECTED 109');
-  pg.query('INSERT INTO bin (bin_path) values ($1)', [binPath])
-    .then(() => pg.end())
-  response.redirect(`/${binPath}`);
-})
-
 ///// FETCH REQUESTS 
 app.get('/:bin_path/:mongo_id', async (request, response) => {
   const mongoId = request.params.mongo_id
   // we are supposed to search by key?
   let singleRequest = await Request.find({key:`${mongoId}`}).exec();
-  console.log('### Mongo QUERIED 120');
+  console.log('### Mongo QUERIED 123');
   console.log(mongoId)
   console.log(singleRequest)
   response.send(singleRequest)
 })
 
-///// FETCH REQUESTS TABLE
-app.get('/:bin_path', async (request, response) => {
-  const binPath = request.params.bin_path
+///// NEW BIN
+app.post('/new_bin', async (request, response) => {
+  const binPath = generateKey(15)
+  console.log(`#### GENERATED ${binPath}`)
   const pg = connectToPg()
   await pg.connect()
-  console.log('### Postgres CONNECTED 130');
+  console.log('### Postgres CONNECTED 112');
+  await pg.query('INSERT INTO bin (bin_path) values ($1)', [binPath])
+    .then(() => pg.end())
+  console.log(binPath, ' NEW BIN');
+  response['bpath'] = binPath;
+  console.log(response.bpath)
+  response.send(binPath);
+})
+
+///// FETCH REQUESTS TABLE
+app.post('/:binpath', async (request, response) => {
+  app.use(express.static('build'));
+  const binPath = request.params.binpath
+  console.log(binPath, ' FETCH REQUEST TABLE')
+
+  const pg = connectToPg()
+  await pg.connect()
+  console.log('### Postgres CONNECTED FETCH REQUESTS TABLE');
 
   let binId;
   await pg.query('SELECT id FROM bin WHERE bin_path = $1', [binPath])
@@ -143,7 +160,13 @@ app.get('/:bin_path', async (request, response) => {
       console.log(result.rows)
       response.send({ requestData: result.rows, path: binPath })
     })
+    // response.sendFile(path, {root: 'build'});
+    // express.static(__dirname + '/static')(req, res, next)
 })
+
+// app.get('/*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
 
 const PORT = 3001
 app.listen(PORT, () => {
