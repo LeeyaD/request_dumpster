@@ -1,8 +1,20 @@
-const express = require('express')
+const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+
 const mongoose = require('mongoose')
 const Request = require('./models/request')
 const { Client } = require('pg')
-const app = express()
+
+app.use(function(req,res,next){
+  req.io = io;
+  next();
+});
+
 app.use(express.static('build'));
 app.use('/:bin_id', express.static('build'));
 const cors = require('cors')
@@ -84,8 +96,18 @@ const registerRequest = async (request, response, binPath, method) => {
 
   await pg.query('INSERT INTO requests (bin_id, mongo_id, mongo_path, http_method, http_path)' +
     'VALUES ($1, $2, $3, $4, $5)', [binId, mongoId, mongoPath, httpMethod, httpPath])
-    .then(() => pg.end())
 
+  let latestRequestTable = {};
+  await pg.query('SELECT * FROM requests WHERE bin_id = $1 ORDER BY RECIEVED_AT DESC ' +
+    'LIMIT 1', [binId])
+    .then((result) => {
+      pg.end()
+      console.log(`$$$$$$$$ ${JSON.stringify(result.rows)}`)
+      latestRequestTable['requestData'] = result.rows;
+      latestRequestTable['path'] = binPath;
+    })
+
+  request.io.sockets.emit('newRequest', latestRequestTable);
   response.status(201).send('### SOMETHING FOR TERMINAL l.79###')
 }
 
@@ -154,21 +176,26 @@ app.post('/:binpath', async (request, response) => {
   await pg.query('SELECT id FROM bin WHERE bin_path = $1', [binPath])
     .then(result => binId = result.rows[0].id)
 
-  pg.query('SELECT * FROM requests WHERE bin_id = $1', [binId])
+  await pg.query('SELECT * FROM requests WHERE bin_id = $1', [binId])
     .then((result) => {
       pg.end()
       console.log(result.rows)
       response.send({ requestData: result.rows, path: binPath })
     })
-    // response.sendFile(path, {root: 'build'});
-    // express.static(__dirname + '/static')(req, res, next)
 })
 
 // app.get('/*', (req, res) => {
 //   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 // });
 
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
 const PORT = 3001
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`### Server running on port ${PORT} ###`)
 })

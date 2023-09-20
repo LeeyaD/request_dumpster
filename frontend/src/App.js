@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Table } from 'react-bootstrap'
+import { socket } from './socket';
 import {
   Routes,
   Route,
@@ -67,7 +68,7 @@ const SideBar = ({ pRequests, handleRequestClick }) => {
       <div id="side-bar">
       <div id="sidebar-header">
         <p><strong>HTTP Method</strong></p>
-        <p id="sidebar-header_path"><strong>URL Path</strong></p>
+        <p id="sidebar-header_path"><strong>Time of Request</strong></p>
       </div>
       <Table striped>
         <tbody></tbody>
@@ -154,6 +155,7 @@ const App = () => {
   const [pgRequests, setPgRequests] = useState([])
   const [homePage, setHomePage] = useState(null)
   const [bin, setBin] = useState(null)
+  console.log('!!!!!! RENDER')
 
   useEffect(() => {
     const currentPath = window.location.pathname
@@ -163,6 +165,23 @@ const App = () => {
       fetchPgData(currentBinPath)
     }
   }, [])
+
+  // need implement socket.disconnect() / reconnect for when server goes down in production
+  useEffect(() => {
+    socket.on('newRequest', (newRequest) => {
+      let zz = {...pgRequests}
+      console.log({zz})
+      console.log(newRequest)
+      if (zz.requestData) {
+        zz.requestData.push(newRequest.requestData[0])
+        setPgRequests(zz)
+        console.log('$$$$$$$$$ socket set PG')
+      }
+    });
+    return () => {
+      socket.removeAllListeners()
+    }
+  }, [pgRequests]);
 
   const fetchPgData = async (currentBinPath) => {
     const pData = await requestService.fetchPgData(currentBinPath)
