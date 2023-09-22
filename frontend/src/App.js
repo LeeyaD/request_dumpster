@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Table } from 'react-bootstrap'
+import { socket } from './socket';
 import {
   Routes,
   Route,
@@ -44,7 +45,7 @@ const Header = ({ bin, newBin }) => {
         </a>
         <Button handleClick={async () => {
           const binPath = await newBin()
-          navigate(`/${binPath}`)
+          navigate(`${binPath}`)
         }} text='New Inspector' />
       </div>
         <p ref={messageRef} id="message" className="fading-element invisible">copied!</p>
@@ -61,13 +62,13 @@ const Header = ({ bin, newBin }) => {
   )
 }
 
-const SideBar = ({ bin, pRequests, handleRequestClick }) => {
+const SideBar = ({ pRequests, handleRequestClick }) => {
   if (!pRequests.requestData) {
     return (
       <div id="side-bar">
       <div id="sidebar-header">
         <p><strong>HTTP Method</strong></p>
-        <p id="sidebar-header_path"><strong>URL Path</strong></p>
+        <p id="sidebar-header_path"><strong>Time of Request</strong></p>
       </div>
       <Table striped>
         <tbody></tbody>
@@ -154,17 +155,37 @@ const App = () => {
   const [pgRequests, setPgRequests] = useState([])
   const [homePage, setHomePage] = useState(null)
   const [bin, setBin] = useState(null)
+  console.log('!!!!!! RENDER')
 
   useEffect(() => {
     const currentPath = window.location.pathname
+    console.log(currentPath)
     const currentBinPath = currentPath.split("/")[1]
     if (currentBinPath && currentBinPath.length === 15) {
       fetchPgData(currentBinPath)
     }
   }, [])
 
+  // need implement socket.disconnect() / reconnect for when server goes down in production
+  useEffect(() => {
+    socket.on('newRequest', (newRequest) => {
+      let zz = {...pgRequests}
+      console.log({zz})
+      console.log(newRequest)
+      if (zz.requestData) {
+        zz.requestData.push(newRequest.requestData[0])
+        setPgRequests(zz)
+        console.log('$$$$$$$$$ socket set PG')
+      }
+    });
+    return () => {
+      socket.removeAllListeners()
+    }
+  }, [pgRequests]);
+
   const fetchPgData = async (currentBinPath) => {
     const pData = await requestService.fetchPgData(currentBinPath)
+    console.log(pData)
     setBin(currentBinPath)
     setPgRequests(pData)
   }
@@ -188,18 +209,18 @@ const App = () => {
       <BrowserRouter>
         <Header bin={bin} newBin={newBin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
         <Routes>
-          <Route path="/" element={
-            <>
-              <div id="container">
-                <SideBar bin={""} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
-                <Main homePage={homePage} />
-              </div>
-            </>
-            } />
-            <Route path="/:bin_path" element={
+            <Route path="/:bin" element={
               <>
                 <div id="container">
-                  <SideBar bin={bin} pRequests={pgRequests} handleRequestClick={handleRequestClick} />
+                  <SideBar pRequests={pgRequests} handleRequestClick={handleRequestClick} />
+                  <Main homePage={homePage} />
+                </div>
+              </>
+            } />
+            <Route path="/" element={
+              <>
+                <div id="container">
+                  <SideBar pRequests={pgRequests} handleRequestClick={handleRequestClick} />
                   <Main homePage={homePage} />
                 </div>
               </>
